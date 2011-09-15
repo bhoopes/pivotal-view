@@ -1,6 +1,6 @@
 <?
 
-if($argc >= 3)
+if($argc < 3)
 {
 	echo "usage: php fetchKey.php <username> <password> <true to write to a file>\n\n";
 	exit;
