@@ -49,6 +49,11 @@
 			$output .= "<div class='storyInfo'><span class='storyData'>".$story->created_at."&nbsp;</span><span class='storyLabel'>Created</span></div><!-- storyInfo -->";
 			$output .= "<div class='storyInfo'><span class='storyData'>".$story->updated_at."&nbsp;</span><span class='storyLabel'>Updated</span></div><!-- storyInfo -->";
 			$output .= "<div class='storyInfo'><span class='storyData'>".$story->accepted_at."&nbsp;</span><span class='storyLabel'>Accepted</span></div><!-- storyInfo -->";
+			$output .= "<br clear=both />";
+			$output .= "<div class='storyDesc'>Description: ";
+			$output .= $story->description;
+			$output .= "<br /><a href='".$story->url."' target='_blank'>View in PivotalTracker</a>";
+			$output .= "</div><!-- storyDesc -->";
 		$output .= "</div> <!-- story -->
 ";
 

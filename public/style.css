@@ -27,6 +27,12 @@
 	clear: both;
 }
 
+.story .storyDesc {
+	width: 100%;
+	font-size: 12px;
+	clear: both;
+}
+
 .storyInfo {
 	width: 15%;
 	min-width: 125px;
