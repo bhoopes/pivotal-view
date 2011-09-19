@@ -115,6 +115,8 @@
 
 </head>
 <body>
+<!-- nav links -->
+<a href="todo.php" alt="Your very own todo list.">Todo</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="logout.php" alt="Logout of your current session">Logout</a>
 <h1>Pivotal View</h1>
 <!-- <h3>Projects</h3> -->
 <?
