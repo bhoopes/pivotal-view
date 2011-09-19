@@ -1,4 +1,19 @@
 <?
+	$token = $_COOKIE['token'];
+	if($token == '')
+	{
+		//echo "No token, redirecting to login page.<br />";
+		//exit;
+		header("location: login.php");
+	}
+	
+	require_once('../classes/PivotalView.php');
+
+	$pv = new PivotalView($token);
+
+	//echo "Token: ".$pv->getToken()."<br /><br />";
+
+	
 	/*
 		SimpleXMLElement Object
 		(
@@ -42,6 +57,10 @@
 	
 	function projectTotals($totals, $story)
 	{
+		//this week
+		$thisWeekStart = strtotime("last monday");
+		$thisWeekEnd = strtotime("next sunday");
+		
 		if($story->estimate < 0)
 		{
 			$totals['counts']['unestimated']++;
@@ -97,15 +116,6 @@
 </head>
 <body>
 <h1>Pivotal View</h1>
-<?
-//phpinfo();
-	require_once('../classes/PivotalView.php');
-
-	$pv = new PivotalView();
-
-	//echo "Token: ".$pv->getToken()."<br /><br />";
-	
-?>
 <!-- <h3>Projects</h3> -->
 <?
 	$projects = $pv->getProjects();

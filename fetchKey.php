@@ -17,6 +17,12 @@ curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($curl, CURLOPT_HEADER, 0);
 $tokenString = curl_exec($curl);
 
+if(trim($tokenString) == "Access denied.")
+{
+	echo "Access denied.\n\n";
+	exit;
+}
+
 $xml = new SimpleXMLElement($tokenString);
 
 //test the xml file

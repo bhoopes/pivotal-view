@@ -1,0 +1,49 @@
+
+.project {
+	margin-bottom: 25px;
+}
+
+.project .projectTitle {
+	font-size: 16px;
+	font-weight: bold;
+}
+
+.stories {
+	display: none;
+}
+
+.toggleStories {
+	font-size: 8px;
+}
+
+.story {
+	margin-bottom: 25px;
+	clear: both;
+}
+
+.story .storyTitle {
+	width: 100%;
+	font-size: 14px;
+	clear: both;
+}
+
+.storyInfo {
+	width: 15%;
+	min-width: 125px;
+	/* border: 1pt solid blue; */
+	float: left;
+	margin-bottom: 5px;
+}
+
+.storyData {
+	width: 100%;
+	float: left;
+	font-size: 13px;
+	/* border: 1pt solid red; */
+}
+
+.storyLabel {
+	width: 100%;
+	float: left;
+	font-size: 10px;
+}

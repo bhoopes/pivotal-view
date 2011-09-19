@@ -4,15 +4,48 @@ class PivotalView
 	private $token;
 	private $baseUrl = "https://www.pivotaltracker.com/services/v3/";
 
-	public function __construct()
+	public function __construct($token = '', $useFile = false)
 	{
-		$this->token = file_get_contents(realpath(dirname(dirname(__FILE__)))."/pivotal-key.txt");
+		if($useFile == true)
+			$this->token = file_get_contents(realpath(dirname(dirname(__FILE__)))."/pivotal-key.txt");
+		else
+			$this->token = $token;
 	}
 
+	public function fetchToken($username, $password)
+	{
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, "https://www.pivotaltracker.com/services/v3/tokens/active");
+		curl_setopt($curl, CURLOPT_USERPWD, "$username:$password");
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($curl, CURLOPT_HEADER, 0);
+		$tokenString = curl_exec($curl);
+
+		if(trim($tokenString) == "Access denied.")
+		{
+			//echo "Access denied.\n\n";
+			return false;
+		}
+		
+		//echo $tokenString;
+		$xml = new SimpleXMLElement($tokenString);
+		//echo $xml."<br />";
+
+		//test the xml file
+		//print_r($xml);
+
+		//store
+		curl_close($curl);
+		$this->token = $xml->guid;
+		//echo $this->getToken();
+		return true;
+	}
+	
 	private function makeRequest($path)
 	{
-		$headerArray = array("X-TrackerToken: ".$this->token);
-
+		if($this->token == '')
+			return;
+		
 		$curl = curl_init();
 		$URL = $this->baseUrl.$path;
 		curl_setopt($curl, CURLOPT_URL, "$URL");
@@ -24,7 +57,7 @@ class PivotalView
 
 		return $string;
 	}
-
+	
 	public function getToken()
 	{
 		return $this->token;
