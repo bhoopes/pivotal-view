@@ -3,7 +3,7 @@ class PivotalView
 {
 	private $token;
 	private $baseUrl = "https://www.pivotaltracker.com/services/v3/";
-	public $states = array("started", "unstarted", "unscheduled", "unestimated", "accepted", "finished");
+	public $states = array("started", "unstarted", "unscheduled", "unestimated", "finished", "accepted");
 
 	public function __construct($token = '', $useFile = false)
 	{
