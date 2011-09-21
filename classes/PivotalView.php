@@ -135,5 +135,17 @@ class PivotalView
 		}
 		return $items;
 	}
+	
+	public function totalsChartData($totals)
+	{
+		/*[['Germany', 'USA', 'Brazil', 'Canada', 'France', 'RU'], [700, 300, 400, 500, 600, 800]] */
+		//echo json_encode($this->states);
+		foreach($this->states AS $state)
+		{
+			$hours[] = $totals['hours'][$state];
+		}
+		$data = array($this->states, $hours);
+		return json_encode($data);
+	}
 }
 ?>

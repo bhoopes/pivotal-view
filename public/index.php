@@ -7,6 +7,8 @@
 		header("location: login.php");
 	}
 	
+	date_default_timezone_set('America/Denver');
+	
 	require_once('../classes/PivotalView.php');
 	$pv = new PivotalView($token);
 	
@@ -117,6 +119,12 @@
 	}
 </script>
 
+<!-- Add Google Chart functionality-->
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+	google.load('visualization', '1');   // Don't need to specify chart libraries!
+</script>
+
 </head>
 <body>
 <!-- nav links -->
@@ -157,6 +165,21 @@
 			<!-- projectStats -->
 			<div class='projectStats'>
 				<div class='storyInfo'><span class='storyData'><?= $project->current_velocity ?>&nbsp;</span><span class='storyLabel'>Current Velocity</span></div><!-- storyInfo -->
+				<br clear=both />
+				<script type="text/javascript">
+					google.setOnLoadCallback(drawChart_<?= $project->id ?>);
+
+					function drawChart_<?= $project->id ?>() {
+						var wrapper = new google.visualization.ChartWrapper({
+							chartType: 'ColumnChart',
+							dataTable: <?= $pv->totalsChartData($totals) ?>,
+							options: {'title': '<?= $project->name ?> Hours'},
+							containerId: 'projectChart_<?= $project->id ?>'
+						});
+						wrapper.draw();
+					}
+				</script>
+				<div id="projectChart_<?= $project->id ?>" style="width: 450px; height: 250px;" ></div>
 				<br clear=both />
 				<div class='storyInfo'><span class='storyData'><?= $totals['hours']['accepted'] ?> hours&nbsp; (<?= $totals['counts']['accepted'] ?> stories)</span><span class='storyLabel'>Accepted</span></div><!-- storyInfo -->
 				<div class='storyInfo'><span class='storyData'><?= $totals['hours']['finished'] ?> hours&nbsp; (<?= $totals['counts']['finished'] ?> stories)</span><span class='storyLabel'>Finished</span></div><!-- storyInfo -->
