@@ -3,6 +3,7 @@ class PivotalView
 {
 	private $token;
 	private $baseUrl = "https://www.pivotaltracker.com/services/v3/";
+	public $states = array("started", "unstarted", "unscheduled", "unestimated", "accepted", "finished");
 
 	public function __construct($token = '', $useFile = false)
 	{
@@ -118,6 +119,17 @@ class PivotalView
 		$projects = $this->makeRequest("projects/$projectId/stories");
 		$projects = $this->parseXML($projects);
 		foreach($projects->project AS $item)
+		{
+			$items[] = $item;
+		}
+		return $items;
+	}
+	
+	public function getActivityStream($limit=25)
+	{
+		$activity = $this->makeRequest("activities/?limit=".$limit);
+		$activity = $this->parseXML($activity);
+		foreach($activity->activity AS $item)
 		{
 			$items[] = $item;
 		}

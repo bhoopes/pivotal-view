@@ -1,4 +1,9 @@
 
+.projects {
+	width: 60%;
+	float: left;
+}
+
 .project {
 	margin-bottom: 25px;
 }
@@ -52,4 +57,25 @@
 	width: 100%;
 	float: left;
 	font-size: 10px;
+}
+
+.activityStream {
+	width: 40%;
+	float: right;
+}
+
+.activityStreamItem {
+	margin-bottom: 5px;
+}
+
+.activityStreamTitle {
+	font-size: 12px;
+}
+
+.activityStreamDetails {
+	font-size: 10px;
+}
+
+.todoStoryDetails {
+	display: none;
 }

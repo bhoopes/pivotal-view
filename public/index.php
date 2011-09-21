@@ -8,9 +8,8 @@
 	}
 	
 	require_once('../classes/PivotalView.php');
-
 	$pv = new PivotalView($token);
-
+	
 	//echo "Token: ".$pv->getToken()."<br /><br />";
 
 	
@@ -32,6 +31,41 @@
 		    [accepted_at] => 2011/07/11 11:24:35 MDT
 		)
 	*/
+	
+	function projectTotals($totals, $story)
+	{
+		//this week
+		$thisWeekStart = strtotime("last monday");
+		$thisWeekEnd = strtotime("next sunday");
+		
+		if($story->estimate < 0)
+		{
+			$totals['counts']['unestimated']++;
+			return $totals;
+		}
+		
+		$state = substr($story->current_state, 0);
+		$estimate = substr($story->estimate, 0);
+		
+		$totals['hours'][$state] = $totals['hours'][$state] + $estimate;
+		$totals['counts'][$state]++;
+		
+		return $totals;
+	}
+	
+	function zeroTotals($totals, $pv)
+	{
+		foreach($pv->states AS $state)
+		{
+			if($totals['counts'][$state] == '')
+				$totals['counts'][$state] = 0;
+			if($totals['hours'][$state] == '')
+				$totals['hours'][$state] = 0;
+		}
+		
+		return $totals;
+	}
+	
 	function displayStory($story)
 	{
 		//print_r($story);
@@ -58,41 +92,6 @@
 ";
 
 		return $output;
-	}
-	
-	function projectTotals($totals, $story)
-	{
-		//this week
-		$thisWeekStart = strtotime("last monday");
-		$thisWeekEnd = strtotime("next sunday");
-		
-		if($story->estimate < 0)
-		{
-			$totals['counts']['unestimated']++;
-			return $totals;
-		}
-		
-		$state = substr($story->current_state, 0);
-		$estimate = substr($story->estimate, 0);
-		
-		$totals['hours'][$state] = $totals['hours'][$state] + $estimate;
-		$totals['counts'][$state]++;
-		
-		return $totals;
-	}
-	
-	function zeroTotals($totals)
-	{
-		$states = array("accepted", "finished", "started", "unstarted", "unscheduled", "unestimated");
-		foreach($states AS $state)
-		{
-			if($totals['counts'][$state] == '')
-				$totals['counts'][$state] = 0;
-			if($totals['hours'][$state] == '')
-				$totals['hours'][$state] = 0;
-		}
-		
-		return $totals;
 	}
 ?>
 <html>
@@ -123,52 +122,76 @@
 <!-- nav links -->
 <a href="todo.php" alt="Your very own todo list.">Todo</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="logout.php" alt="Logout of your current session">Logout</a>
 <h1>Pivotal View</h1>
-<!-- <h3>Projects</h3> -->
-<?
-	$projects = $pv->getProjects();
-	foreach($projects AS $project)
-	{
-	?>
-		<div class='project'>
-		<div class='projectTitle'>
-			<?= $project->name ?>
-			<span class='toggleStories'>(<a href='#' onclick='return toggleStories(<?= $project->id ?>)' >show/hide stories</a>)</span>
-		</div>
-		<?
-		$stories = $pv->getStories($project->id);
-		$totals = array('hours' => array(), 'counts' => array());
-		if(count($stories))
+<div class="projects">
+	<h3>Projects</h3>
+	<?
+		$projects = $pv->getProjects();
+		foreach($projects AS $project)
 		{
 		?>
-			<div class='stories' id='stories_<?= $project->id ?>'>
+			<div class='project'>
+			<div class='projectTitle'>
+				<?= $project->name ?>
+				<span class='toggleStories'>(<a href='#' onclick='return toggleStories(<?= $project->id ?>)' >show/hide stories</a>)</span>
+			</div>
 			<?
-			foreach($stories AS $story)
+			$stories = $pv->getStories($project->id);
+			$totals = array('hours' => array(), 'counts' => array());
+			if(count($stories))
 			{
-				echo displayStory($story);
-				$totals = projectTotals($totals, $story);
-			}
 			?>
-			</div> <!-- stories -->
+				<div class='stories' id='stories_<?= $project->id ?>'>
+				<?
+				foreach($stories AS $story)
+				{
+					echo displayStory($story);
+					$totals = projectTotals($totals, $story);
+				}
+				?>
+				</div> <!-- stories -->
+			<?
+			}
+			//print_r($totals);
+			$totals = zeroTotals($totals, $pv);
+			?>
+			<!-- projectStats -->
+			<div class='projectStats'>
+				<div class='storyInfo'><span class='storyData'><?= $project->current_velocity ?>&nbsp;</span><span class='storyLabel'>Current Velocity</span></div><!-- storyInfo -->
+				<br clear=both />
+				<div class='storyInfo'><span class='storyData'><?= $totals['hours']['accepted'] ?> hours&nbsp; (<?= $totals['counts']['accepted'] ?> stories)</span><span class='storyLabel'>Accepted</span></div><!-- storyInfo -->
+				<div class='storyInfo'><span class='storyData'><?= $totals['hours']['finished'] ?> hours&nbsp; (<?= $totals['counts']['finished'] ?> stories)</span><span class='storyLabel'>Finished</span></div><!-- storyInfo -->
+				<div class='storyInfo'><span class='storyData'><?= $totals['hours']['started'] ?> hours&nbsp; (<?= $totals['counts']['started'] ?> stories)</span><span class='storyLabel'>Started</span></div><!-- storyInfo -->
+				<div class='storyInfo'><span class='storyData'><?= $totals['hours']['unstarted'] ?> hours&nbsp; (<?= $totals['counts']['unstarted'] ?> stories)</span><span class='storyLabel'>Unstarted</span></div><!-- storyInfo -->
+				<div class='storyInfo'><span class='storyData'><?= $totals['hours']['unscheduled'] ?> hours&nbsp; (<?= $totals['counts']['unscheduled'] ?> stories)</span><span class='storyLabel'>Unscheduled</span></div><!-- storyInfo -->
+				<div class='storyInfo'><span class='storyData'>(<?= $totals['counts']['unestimated'] ?> stories)&nbsp;</span><span class='storyLabel'>Un-estimated</span></div><!-- storyInfo -->
+			</div>
+			</div>  <!-- project -->
+			<br clear=all>
 		<?
 		}
-		//print_r($totals);
-		$totals = zeroTotals($totals);
-		?>
-		<!-- projectStats -->
-		<div class='projectStats'>
-			<div class='storyInfo'><span class='storyData'><?= $project->current_velocity ?>&nbsp;</span><span class='storyLabel'>Current Velocity</span></div><!-- storyInfo -->
-			<br clear=both />
-			<div class='storyInfo'><span class='storyData'><?= $totals['hours']['accepted'] ?> hours&nbsp; (<?= $totals['counts']['accepted'] ?> stories)</span><span class='storyLabel'>Accepted</span></div><!-- storyInfo -->
-			<div class='storyInfo'><span class='storyData'><?= $totals['hours']['finished'] ?> hours&nbsp; (<?= $totals['counts']['finished'] ?> stories)</span><span class='storyLabel'>Finished</span></div><!-- storyInfo -->
-			<div class='storyInfo'><span class='storyData'><?= $totals['hours']['started'] ?> hours&nbsp; (<?= $totals['counts']['started'] ?> stories)</span><span class='storyLabel'>Started</span></div><!-- storyInfo -->
-			<div class='storyInfo'><span class='storyData'><?= $totals['hours']['unstarted'] ?> hours&nbsp; (<?= $totals['counts']['unstarted'] ?> stories)</span><span class='storyLabel'>Unstarted</span></div><!-- storyInfo -->
-			<div class='storyInfo'><span class='storyData'><?= $totals['hours']['unscheduled'] ?> hours&nbsp; (<?= $totals['counts']['unscheduled'] ?> stories)</span><span class='storyLabel'>Unscheduled</span></div><!-- storyInfo -->
-			<div class='storyInfo'><span class='storyData'>(<?= $totals['counts']['unestimated'] ?> stories)&nbsp;</span><span class='storyLabel'>Un-estimated</span></div><!-- storyInfo -->
-		</div>
-		</div>  <!-- project -->
-		<br clear=all>
+	?> <!-- projects -->
+</div>
+<div class="activityStream">
+	<h3>Activity Stream</h3>
 	<?
-	}
-?>
+		$activites = $pv->getActivityStream();
+		if(count($activites))
+		{
+			foreach($activites AS $activity)
+			{
+				?>
+				<div class="activityStreamItem">
+					<span class="activityStreamTitle"><?= $activity->description ?></span><!-- activityStreamTitle -->
+					<br />
+					<span class="activityStreamDetails">
+						(<?= $activity->occurred_at ?>)
+						<a href='https://www.pivotaltracker.com/story/show/<?= $activity->stories->story->id ?>' alt='Really? Show me.' target='_blank' >View in Pivotal Tracker</a>
+					</span>
+				</div> <!-- activityStreamItem -->
+				<?
+			}
+		}
+	?>
+</div>
 </body>
 </html>
