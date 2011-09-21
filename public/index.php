@@ -131,69 +131,89 @@
 <a href="todo.php" alt="Your very own todo list.">Todo</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="logout.php" alt="Logout of your current session">Logout</a>
 <h1>Pivotal View</h1>
 <div class="projects">
-	<h3>Projects</h3>
+	<!-- <h3>Projects</h3> -->
 	<?
 		$projects = $pv->getProjects();
 		foreach($projects AS $project)
 		{
 		?>
 			<div class='project'>
-			<div class='projectTitle'>
-				<?= $project->name ?>
-				<span class='toggleStories'>(<a href='#' onclick='return toggleStories(<?= $project->id ?>)' >show/hide stories</a>)</span>
-			</div>
-			<?
-			$stories = $pv->getStories($project->id);
-			$totals = array('hours' => array(), 'counts' => array());
-			if(count($stories))
-			{
-			?>
-				<div class='stories' id='stories_<?= $project->id ?>'>
+				<div class='projectTitle'>
+					<?= $project->name ?>
+					<br /><span class='toggleStories'>(<a href='#' onclick='return toggleStories(<?= $project->id ?>)' >show/hide stories</a>)</span>
+				</div>
+				<div class="projectVelocity">
+					<div class='storyInfo'><span class='storyData'><?= $project->current_velocity ?>&nbsp;</span><span class='storyLabel'>Current Velocity</span></div><!-- storyInfo -->
+				</div>
 				<?
-				foreach($stories AS $story)
+				$stories = $pv->getStories($project->id);
+				$totals = array('hours' => array(), 'counts' => array());
+				if(count($stories))
 				{
-					echo displayStory($story);
-					$totals = projectTotals($totals, $story);
+					foreach($stories AS $story)
+					{
+						$totals = projectTotals($totals, $story);
+					}
+				}
+				//print_r($totals);
+				$totals = zeroTotals($totals, $pv);
+				?>
+				<!-- projectStats -->
+				<div class='projectStats'>
+					<script type="text/javascript">
+						google.setOnLoadCallback(drawChart_<?= $project->id ?>);
+
+						function drawChart_<?= $project->id ?>() {
+							var wrapper = new google.visualization.ChartWrapper({
+								chartType: 'ColumnChart',
+								dataTable: <?= $pv->totalsChartData($totals) ?>,
+								options: {'title': '<?= $project->name ?> Hours'},
+								containerId: 'projectChart_<?= $project->id ?>'
+							});
+							wrapper.draw();
+						}
+					</script>
+					<div class="projectChart" id="projectChart_<?= $project->id ?>" style="" ></div>
+					<br clear=both />
+					<?
+						foreach($pv->states AS $state)
+						{
+							?>
+							<div class='storyInfo'><span class='storyData'><?= $totals['hours'][$state] ?> hours&nbsp; (<?= $totals['counts'][$state] ?> stories)</span><span class='storyLabel'><?= ucwords($state) ?></span></div><!-- storyInfo -->
+							<?
+						}
+					?>
+					<? /*
+					<div class='storyInfo'><span class='storyData'><?= $totals['hours']['accepted'] ?> hours&nbsp; (<?= $totals['counts']['accepted'] ?> stories)</span><span class='storyLabel'>Accepted</span></div><!-- storyInfo -->
+					<div class='storyInfo'><span class='storyData'><?= $totals['hours']['finished'] ?> hours&nbsp; (<?= $totals['counts']['finished'] ?> stories)</span><span class='storyLabel'>Finished</span></div><!-- storyInfo -->
+					<div class='storyInfo'><span class='storyData'><?= $totals['hours']['started'] ?> hours&nbsp; (<?= $totals['counts']['started'] ?> stories)</span><span class='storyLabel'>Started</span></div><!-- storyInfo -->
+					<div class='storyInfo'><span class='storyData'><?= $totals['hours']['unstarted'] ?> hours&nbsp; (<?= $totals['counts']['unstarted'] ?> stories)</span><span class='storyLabel'>Unstarted</span></div><!-- storyInfo -->
+					<div class='storyInfo'><span class='storyData'><?= $totals['hours']['unscheduled'] ?> hours&nbsp; (<?= $totals['counts']['unscheduled'] ?> stories)</span><span class='storyLabel'>Unscheduled</span></div><!-- storyInfo -->
+					<div class='storyInfo'><span class='storyData'>(<?= $totals['counts']['unestimated'] ?> stories)&nbsp;</span><span class='storyLabel'>Un-estimated</span></div><!-- storyInfo -->
+					 */ ?>
+				</div>
+				<?
+				if(count($stories))
+				{
+				?>
+					<div class='stories' id='stories_<?= $project->id ?>'>
+					<?
+					foreach($stories AS $story)
+					{
+						echo displayStory($story);
+					}
+					?>
+					</div> <!-- stories -->
+				<?
 				}
 				?>
-				</div> <!-- stories -->
-			<?
-			}
-			//print_r($totals);
-			$totals = zeroTotals($totals, $pv);
-			?>
-			<!-- projectStats -->
-			<div class='projectStats'>
-				<div class='storyInfo'><span class='storyData'><?= $project->current_velocity ?>&nbsp;</span><span class='storyLabel'>Current Velocity</span></div><!-- storyInfo -->
-				<br clear=both />
-				<script type="text/javascript">
-					google.setOnLoadCallback(drawChart_<?= $project->id ?>);
-
-					function drawChart_<?= $project->id ?>() {
-						var wrapper = new google.visualization.ChartWrapper({
-							chartType: 'ColumnChart',
-							dataTable: <?= $pv->totalsChartData($totals) ?>,
-							options: {'title': '<?= $project->name ?> Hours'},
-							containerId: 'projectChart_<?= $project->id ?>'
-						});
-						wrapper.draw();
-					}
-				</script>
-				<div id="projectChart_<?= $project->id ?>" style="width: 450px; height: 250px;" ></div>
-				<br clear=both />
-				<div class='storyInfo'><span class='storyData'><?= $totals['hours']['accepted'] ?> hours&nbsp; (<?= $totals['counts']['accepted'] ?> stories)</span><span class='storyLabel'>Accepted</span></div><!-- storyInfo -->
-				<div class='storyInfo'><span class='storyData'><?= $totals['hours']['finished'] ?> hours&nbsp; (<?= $totals['counts']['finished'] ?> stories)</span><span class='storyLabel'>Finished</span></div><!-- storyInfo -->
-				<div class='storyInfo'><span class='storyData'><?= $totals['hours']['started'] ?> hours&nbsp; (<?= $totals['counts']['started'] ?> stories)</span><span class='storyLabel'>Started</span></div><!-- storyInfo -->
-				<div class='storyInfo'><span class='storyData'><?= $totals['hours']['unstarted'] ?> hours&nbsp; (<?= $totals['counts']['unstarted'] ?> stories)</span><span class='storyLabel'>Unstarted</span></div><!-- storyInfo -->
-				<div class='storyInfo'><span class='storyData'><?= $totals['hours']['unscheduled'] ?> hours&nbsp; (<?= $totals['counts']['unscheduled'] ?> stories)</span><span class='storyLabel'>Unscheduled</span></div><!-- storyInfo -->
-				<div class='storyInfo'><span class='storyData'>(<?= $totals['counts']['unestimated'] ?> stories)&nbsp;</span><span class='storyLabel'>Un-estimated</span></div><!-- storyInfo -->
-			</div>
 			</div>  <!-- project -->
-			<br clear=all>
+
 		<?
 		}
 	?> <!-- projects -->
-</div>
+</div> <!-- projects -->
+
 <div class="activityStream">
 	<h3>Activity Stream</h3>
 	<?
