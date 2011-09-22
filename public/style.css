@@ -1,4 +1,41 @@
 
+.header {
+	width: 100%;
+	clear: both;
+	float: left;
+	background: #256188;
+	
+	margin-bottom: 10px;
+	/* border: 1pt solid red; */
+}
+
+#headerLinks {
+	margin-left: 10px;
+	margin-top: 10px;
+	font-size: 12px;
+	color: white;
+}
+
+#headerLinks a {
+	font-size: 12px;
+	color: white;
+	text-decoration: none;
+}
+
+#headerTitle {
+	font-size: 30px;
+	font-weight: bold;
+	float: left;
+	margin: 10px;
+	color: white;
+
+}
+
+#headerLogo {
+	float: right;
+	margin-right: 15px;
+}
+
 .projects {
 	width: 62%;
 	float: left;
@@ -23,6 +60,10 @@
 .project .projectVelocity {
 	width: 25%;
 	float: right;
+}
+
+.project .projectVelocity .storyData {
+	font-weight: bold;
 }
 
 .stories {

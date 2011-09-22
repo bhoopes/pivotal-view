@@ -122,8 +122,7 @@ function displayStory($story)
 		</script>
 	</head>
 	<body>
-		<a href="index.php" alt="The big picture.">Project Overview</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="logout.php" alt="Logout of your current session">Logout</a>
-		<h1>Todo</h1>
+		<? include("header.php"); ?>
 		<?
 		if($error != '')
 			echo "<h3>".$error."</h3>";
