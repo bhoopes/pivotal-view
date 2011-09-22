@@ -6,6 +6,7 @@
 		&nbsp;&nbsp;|&nbsp;&nbsp;
 		<a href="logout.php" alt="Logout of your current session">Logout</a>
 	</div>
-	<div id="headerTitle">Pivotal View</div>
-	<div id="headerLogo"><img src="../images/DDMlogo.gif" height="45px" /></div>
+	<!-- <div id="headerTitle">Pivotal View</div> -->
+	<div id="headerTitle"><img src="/images/pvLogo.jpg" /></div>
+	<div id="headerLogo"><img src="/images/DDMlogo.gif" height="45px" /></div>
 </div>
