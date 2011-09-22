@@ -32,9 +32,11 @@ if($_REQUEST['submit'] == 'Submit')
 <html>
 	<head>
 		<title>Pivotal View - Login</title>
+		<link type="text/css" rel="stylesheet" href="style.css" /> 
 	</head>
 	<body>
-		<h1>Pivotal View Login</h1>
+		<!-- <h1>Pivotal View Login</h1> -->
+		<? include("header.php"); ?>
 		<h3><?= $error ?></h3>
 		<form action="login.php" method="POST">
 			<span class="inputLabel">Username: </span><input type="text" name="username"></input>
