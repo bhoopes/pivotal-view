@@ -8,9 +8,9 @@ if($token == '')
 	header("location: login.php");
 }
 
-$fullname_array = array("bhoopes" => "Brian Hoopes", "codazoda" => "Joel Dare");
-$username = $_COOKIE['pv_username'];
-$fullname = $fullname_array[$username];
+$displayUser = filter_var($_GET['displayUser'], FILTER_SANITIZE_ENCODED);
+if($displayUser == '')
+	$displayUser = "none";
 
 require_once('../classes/PivotalView.php');
 
@@ -39,29 +39,22 @@ $pv = new PivotalView($token);
 */
 
 //$fullname = "Brian Hoopes";
-if($fullname != '')
+$projects = $pv->getProjects();
+foreach($projects AS $project)
 {
-	$projects = $pv->getProjects();
-	foreach($projects AS $project)
+	$stories = $pv->getStories($project->id);
+	if(count($stories))
 	{
-		$stories = $pv->getStories($project->id);
-		if(count($stories))
+		foreach($stories AS $story)
 		{
-			foreach($stories AS $story)
-			{
-				if($story->owned_by == $fullname)
-				{
-					$story->project_name = $project->name;
-					$state = substr($story->current_state, 0);
-					$todo[$state][] = $story;
-				}
-			}
+			$owner = substr($story->owned_by,0);
+			if($owner == '0')
+				$owner = "none";
+			$story->project_name = $project->name;
+			$state = substr($story->current_state, 0);
+			$todo[$owner][$state][] = $story;
 		}
 	}
-}
-else
-{
-	$error = "Sorry, no name found.<br />";
 }
 
 function displayStory($story)
@@ -119,6 +112,14 @@ function displayStory($story)
 				}
 				return false;
 			}
+			
+			function toggleList()
+			{
+				$(".todoList").css('display', 'none');
+				
+				var displayDiv = '#todo_' + $("#displayUser").val();
+				$(displayDiv).css('display', 'block');
+			}
 		</script>
 	</head>
 	<body>
@@ -129,16 +130,42 @@ function displayStory($story)
 		
 		if(count($todo))
 		{
-			foreach($pv->states AS $state)
-			{
-				echo "<h3>".ucwords($state)."</h3>";
-				if(count($todo[$state]))
+			echo "<form action='todo.php'>";
+				echo "<select id='displayUser' name='displayUser' onChange='toggleList();'>";
+				foreach($todo AS $name => $states)
 				{
-					foreach($todo[$state] AS $item)
+					echo "<option value='".str_replace(' ', '', $name)."'";
+					if(str_replace(' ', '', $name) == $displayUser)
+						echo " selected ";
+					echo ">".$name."</option>";
+				}
+				echo "</select> <!-- display_user -->";
+			echo "</form>";
+		}
+		
+		if(count($todo))
+		{
+			foreach($todo AS $name => $states)
+			{
+				$userDiv = str_replace(' ', '', $name);
+				echo "<div class='todoList' style='display: ";
+				if($displayUser == $userDiv)
+					echo "block";
+				else 
+					echo "none";
+				echo ";' id='todo_".str_replace(' ', '', $name)."'>";
+				foreach($pv->states AS $state)
+				{
+					echo "<h3>".ucwords($state)."</h3>";
+					if(count($todo[$name][$state]))
 					{
-						echo displayStory($item);
+						foreach($todo[$name][$state] AS $item)
+						{
+							echo displayStory($item);
+						}
 					}
 				}
+				echo "</div>";
 			}
 		}
 		?>
