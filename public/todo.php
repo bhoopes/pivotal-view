@@ -10,6 +10,10 @@ if($token == '')
 
 $displayUser = filter_var($_GET['displayUser'], FILTER_SANITIZE_ENCODED);
 if($displayUser == '')
+{
+	$displayUser = $_COOKIE['displayUser'];
+}
+if($displayUser == '')
 	$displayUser = "none";
 
 require_once('../classes/PivotalView.php');
@@ -56,6 +60,9 @@ foreach($projects AS $project)
 		}
 	}
 }
+
+//sort the todo list by name
+ksort($todo);
 
 function displayStory($story)
 {
@@ -120,6 +127,16 @@ function displayStory($story)
 				var displayDiv = '#todo_' + $("#displayUser").val();
 				$(displayDiv).css('display', 'block');
 			}
+
+			function setDefaultUser()
+			{
+				var displayUser = $("#displayUser").val();
+				var url = "/todo_defaultUser.php?displayUser=" + displayUser;
+				//alert(url);
+				$.ajax(url);
+
+				return false;
+			}
 		</script>
 	</head>
 	<body>
@@ -140,6 +157,7 @@ function displayStory($story)
 					echo ">".$name."</option>";
 				}
 				echo "</select> <!-- display_user -->";
+			echo "&nbsp;&nbsp;<a href='#' onClick='return setDefaultUser()'>set as default</a>";
 			echo "</form>";
 		}
 		
