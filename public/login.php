@@ -14,8 +14,9 @@ if($_REQUEST['submit'] == 'Submit')
 	{
 		
 		$token = $pv->getToken();
-		setcookie('token', $token);
-		setcookie('pv_username' , $username);
+		$tokenExpire = $pv->getTokenExpire();
+		setcookie('token', $token, $tokenExpire);
+		setcookie('pv_username' , $username, $tokenExpire);
 		
 		//$_SESSION['token'] = $token;
 		//echo "token: ".$_SESSION['token']."<br />";

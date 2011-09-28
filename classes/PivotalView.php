@@ -147,5 +147,14 @@ class PivotalView
 		$data = array($this->states, $hours);
 		return json_encode($data);
 	}
+
+	public function getTokenExpire()
+	{
+		//seconds in a month
+		//seconds, minutes, hours, days
+		$offset = 60*60*24*30;
+
+		return time()+$offset;
+	}
 }
 ?>
