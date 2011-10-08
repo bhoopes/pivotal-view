@@ -35,16 +35,16 @@ if($_REQUEST['submit'] == 'Submit')
 		<title>Pivotal View - Login</title>
 		<link type="text/css" rel="stylesheet" href="style.css" /> 
 	</head>
-	<body>
+	<body onload="document.form.username.focus();">
 		<!-- <h1>Pivotal View Login</h1> -->
 		<? include("header.php"); ?>
 		<h3><?= $error ?></h3>
-		<form action="login.php" method="POST">
-			<span class="inputLabel">Username: </span><input type="text" name="username"></input>
+		<form name="form" action="login.php" method="POST">
+			<span class="inputLabel">Username: </span><input type="text" name="username" tabindex="1"></input>
 			<br />
-			<span class="inputLabel">Password: </span><input type="password" name="pwd"></input>
+			<span class="inputLabel">Password: </span><input type="password" name="pwd" tabindex="2"></input>
 			<br />
-			<input type="submit" name="submit" value="Submit"></input>
+			<input type="submit" name="submit" value="Submit" tabindex="3" ></input>
 				
 		</form>
 	</body>
