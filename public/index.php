@@ -160,13 +160,33 @@
 				</div>
 				<div class="projectInfoRight">
 					<div class="projectVelocity">
-						<div class='storyInfo'><span class='storyData'><?= $project->current_velocity ?>&nbsp;</span><span class='storyLabel'>Current Velocity</span></div><!-- storyInfo -->
+						<div class='storyInfo' ><span class='storyData' ><?= $project->current_velocity ?>&nbsp;</span><span class='storyLabel' style="width: 150px;" >current velocity</span></div><!-- storyInfo -->
 					</div>
+					<br clear="both" />
 					<div class="projectEstimatedCompletion">
-						<div class='storyInfo'><span class='storyData'><?= date("m/d/Y", $estimatedCompletionDate); ?>&nbsp;</span><span class='storyLabel'>Estimated Completion Week</span></div><!-- storyInfo -->
+						<div class='storyInfo' ><span class='storyData' ><?= date("m/d/Y", $estimatedCompletionDate); ?>&nbsp;</span><span class='storyLabel' style="width: 150px;">estimated completion week</span></div><!-- storyInfo -->
 					</div>
 				</div>
+				<div class="projectTitleProgressChart">
+					<!-- draw the chart -->
+					<script type="text/javascript">
+						google.setOnLoadCallback(drawWeeklyProgressBarChart_<?= $project->id ?>);
 
+						function drawWeeklyProgressBarChart_<?= $project->id ?>() {
+							var data = new google.visualization.DataTable();
+							<?= $pv->weeklyProgressChartData($weeklyProgress) ?>
+
+							var chart = new google.visualization.ColumnChart(
+								document.getElementById('projectWeeklyProgressBarChart_<?= $project->id ?>') 
+							);
+							chart.draw(data, {'legend':'none', 'chartArea':{'left':'0', 'width':'200'}, 'width':'200', 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
+						}
+					</script>
+					<div class="progressChart" id="projectWeeklyProgressBarChart_<?= $project->id ?>" style="" ></div>
+					<br style="line-height: 1px;"/>
+					<div class="progressChartLabel" >hours completed by week</div>
+					<!-- end of chart -->
+				</div>
 				<!-- show the weekly progress graph -->
 				<script type="text/javascript">
 					google.setOnLoadCallback(drawBarChart_<?= $project->id ?>);
@@ -176,7 +196,7 @@
 							chartType: 'BarChart',
 							dataTable: <?= json_encode($simpleTotals) ?>,
 							//'title': '<?= $project->name ?> Hours',
-							options: { 'isStacked':'true', 'legend':'bottom', colors:['#4b80c4','#61b847', '#f27926'], 'hAxis':{'maxValue':'1', 'viewWindow':{'max':'<?= $totalHours ?>'}}},
+							options: { 'isStacked':'true', 'legend':'bottom', 'chartArea':{'left':'0', 'width':'675'}, colors:['#4b80c4','#61b847', '#f27926'], 'hAxis':{'maxValue':'1', 'viewWindow':{'max':'<?= $totalHours ?>'}}},
 							containerId: 'projectBarChart_<?= $project->id ?>'
 						});
 						wrapper.draw();
@@ -213,7 +233,7 @@
 						foreach($pv->states AS $state)
 						{
 							?>
-							<div class='storyInfo'><span class='storyData'><?= $totals['hours'][$state] ?> hours&nbsp;<br />(<?= $totals['counts'][$state] ?> stories)</span><span class='storyLabel <?= $state ?>'><?= ucwords($state) ?></span></div><!-- storyInfo -->
+							<div class='storyInfo'><span class='storyData'><?= $totals['hours'][$state] ?> hours&nbsp;<br />(<?= $totals['counts'][$state] ?> stories)</span><span class='storyLabel <?= $state ?>'><?= $state ?></span></div><!-- storyInfo -->
 							<?
 						}
 						/* End display the state totals for the project */
@@ -221,23 +241,7 @@
 				</div>
 				<?
 				/*
-				<!-- draw the chart -->
-				<script type="text/javascript">
-					google.setOnLoadCallback(drawWeeklyProgressBarChart_<?= $project->id ?>);
 
-					function drawWeeklyProgressBarChart_<?= $project->id ?>() {
-						var data = new google.visualization.DataTable();
-						<?= $pv->weeklyProgressChartData($weeklyProgress) ?>
-
-						var chart = new google.visualization.ColumnChart(
-							document.getElementById('projectWeeklyProgressBarChart_<?= $project->id ?>') 
-						);
-						chart.draw(data, {'legend':'none', 'vAxis': {'title':'Hours completed by week'}, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
-					}
-				</script>
-				<div class="progressChart" id="projectWeeklyProgressBarChart_<?= $project->id ?>" style="" ></div>
-				<br clear=both />
-				<!-- end of chart -->
 				*/
 				?>
 				<?

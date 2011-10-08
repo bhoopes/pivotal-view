@@ -37,18 +37,19 @@
 }
 
 .projects {
-	width: 62%;
+	width: 700px;
 	float: left;
 }
 
 .project {
 	margin-bottom: 15px;
-	margin-right: 15px;
+	margin-right: 10px;
+	margin-left: 10px;
 	/* width: 375px; */
-	width: 700px;
-	/* border-bottom: 1pt solid black; */
+	width: 680px;
+	border-bottom: 1pt solid gray;
 	float: left;
-	padding: 10px;
+	/* padding: 10px; */
 }
 
 .project .projectTitle {
@@ -56,6 +57,22 @@
 	font-weight: bold;
 	width: 300px;
 	float: left;
+}
+
+.projectTitleProgressChart {
+	float: right;
+	/* border: 1pt solid red; */
+}
+
+.progressChart {
+	float: right;
+	width: 150px;
+	height: 43px;
+}
+
+.progressChartLabel {
+	font-size: 8px;
+	width: 150px;
 }
 
 .projectInfoRight {
@@ -72,8 +89,8 @@
 .project .projectVelocity .storyData, .project .projectEstimatedCompletion .storyData {
 	font-weight: bold;
 	text-align: right;
-	float: none;
-	width: 100px;
+	float: left;
+	width: 150px;
 	font-size: 13px;
 }
 
@@ -106,7 +123,7 @@
 
 .storyInfo {
 	width: 10%;
-	min-width: 100px;
+	min-width: 75px;
 	/* border: 1pt solid blue; */
 	float: left;
 	margin-bottom: 5px;
@@ -142,14 +159,6 @@
 	clear: both;
 	/* width: 375px; */
 	width: 700px;
-	height: 100px;
-}
-
-.progressChart {
-	float: left;
-	clear: both;
-	/* width: 375px; */
-	width: 400px;
 	height: 100px;
 }
 

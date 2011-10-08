@@ -5,9 +5,9 @@ class PivotalView
 	private $baseUrl = "https://www.pivotaltracker.com/services/v3/";
 	//public $states = array("started", "unstarted", "unscheduled", "unestimated", "finished", "delivered", "accepted");
 	public $states = array("accepted", "started", "finished", "delivered", "unstarted", "unscheduled", "unestimated");
-	public $simpleStates = array("Complete" => array("accepted"), 
-									"In Progress" => array("started", "finished", "delivered"),
-									"Outstanding" => array("unstarted", "unscheduled", "unestimaged"));
+	public $simpleStates = array("complete" => array("accepted"), 
+									"in progress" => array("started", "finished", "delivered"),
+									"outstanding" => array("unstarted", "unscheduled", "unestimaged"));
 
 	public function __construct($token = '', $useFile = false)
 	{
@@ -207,7 +207,7 @@ class PivotalView
 	{
 		foreach($weeklyProgress AS $timestamp => $hours)
 		{
-			$date = date("m-d-Y", $timestamp);
+			$date = date("m/d/Y", $timestamp);
 			$labels[] = $date;
 			$values[] = $hours;
 			$dataTableRows[] = array($date, $hours);
