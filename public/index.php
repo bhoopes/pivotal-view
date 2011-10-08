@@ -34,8 +34,9 @@
 		)
 	*/
 	
-	function projectTotals($totals, $story)
+	function projectTotals($totals, $story, &$totalHours)
 	{
+		$startDate = 0;
 		//this week
 		$thisWeekStart = strtotime("last monday");
 		$thisWeekEnd = strtotime("next sunday");
@@ -51,6 +52,8 @@
 		
 		$totals['hours'][$state] = $totals['hours'][$state] + $estimate;
 		$totals['counts'][$state]++;
+		
+		$totalHours += $estimate;
 		
 		return $totals;
 	}
@@ -122,7 +125,7 @@
 <!-- Add Google Chart functionality-->
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 <script type="text/javascript">
-	google.load('visualization', '1');   // Don't need to specify chart libraries!
+	google.load('visualization', '1', {packages:["corechart"]});   // Don't need to specify chart libraries!
 </script>
 
 </head>
@@ -134,30 +137,60 @@
 		$projects = $pv->getProjects();
 		foreach($projects AS $project)
 		{
-		?>
+			$totalHours = 0;
+			$stories = $pv->getStories($project->id);
+			$weeklyProgress = $pv->weeklyProgress($stories);
+			$totals = array('hours' => array(), 'counts' => array());
+			if(count($stories))
+			{
+				foreach($stories AS $story)
+				{
+					$totals = projectTotals($totals, $story, $totalHours);
+				}
+			}
+			//print_r($totals);
+			$totals = zeroTotals($totals, $pv);
+			$simpleTotals = $pv->totalsChartData($totals);
+			$estimatedCompletionDate = $pv->getProjectedCompletionWeek($simpleTotals, $project->current_velocity);
+			?>			
 			<div class='project'>
 				<div class='projectTitle'>
 					<?= $project->name ?>
 					<br /><span class='toggleStories'>(<a href='#' onclick='return toggleStories(<?= $project->id ?>)' >show/hide stories</a>)</span>
 				</div>
-				<div class="projectVelocity">
-					<div class='storyInfo'><span class='storyData'><?= $project->current_velocity ?>&nbsp;</span><span class='storyLabel'>Current Velocity</span></div><!-- storyInfo -->
+				<div class="projectInfoRight">
+					<div class="projectVelocity">
+						<div class='storyInfo'><span class='storyData'><?= $project->current_velocity ?>&nbsp;</span><span class='storyLabel'>Current Velocity</span></div><!-- storyInfo -->
+					</div>
+					<div class="projectEstimatedCompletion">
+						<div class='storyInfo'><span class='storyData'><?= date("m/d/Y", $estimatedCompletionDate); ?>&nbsp;</span><span class='storyLabel'>Estimated Completion Week</span></div><!-- storyInfo -->
+					</div>
 				</div>
-				<?
-				$stories = $pv->getStories($project->id);
-				$totals = array('hours' => array(), 'counts' => array());
-				if(count($stories))
-				{
-					foreach($stories AS $story)
-					{
-						$totals = projectTotals($totals, $story);
+
+				<!-- show the weekly progress graph -->
+				<script type="text/javascript">
+					google.setOnLoadCallback(drawBarChart_<?= $project->id ?>);
+
+					function drawBarChart_<?= $project->id ?>() {
+						var wrapper = new google.visualization.ChartWrapper({
+							chartType: 'BarChart',
+							dataTable: <?= json_encode($simpleTotals) ?>,
+							//'title': '<?= $project->name ?> Hours',
+							options: { 'isStacked':'true', 'legend':'bottom', colors:['#4b80c4','#61b847', '#f27926'], 'hAxis':{'maxValue':'1', 'viewWindow':{'max':'<?= $totalHours ?>'}}},
+							containerId: 'projectBarChart_<?= $project->id ?>'
+						});
+						wrapper.draw();
 					}
-				}
-				//print_r($totals);
-				$totals = zeroTotals($totals, $pv);
-				?>
+				</script>
+				<div class="projectChart" id="projectBarChart_<?= $project->id ?>" style="" ></div>
+				<br clear=both />
+				<!-- end show the weekly progress graph -->
+				
 				<!-- projectStats -->
 				<div class='projectStats'>
+					<? /*
+					 * This is a bar chart that is currently unused
+					 * But I didn't want to delete it because it might be useful for others
 					<script type="text/javascript">
 						google.setOnLoadCallback(drawChart_<?= $project->id ?>);
 
@@ -171,26 +204,44 @@
 							wrapper.draw();
 						}
 					</script>
-					<div class="projectChart" id="projectChart_<?= $project->id ?>" style="" ></div>
-					<br clear=both />
+					 <div class="projectChart" id="projectChart_<?= $project->id ?>" style="" ></div>
+					 */
+					?>
+					
 					<?
+						/* Display the state totals for the project */
 						foreach($pv->states AS $state)
 						{
 							?>
-							<div class='storyInfo'><span class='storyData'><?= $totals['hours'][$state] ?> hours&nbsp; (<?= $totals['counts'][$state] ?> stories)</span><span class='storyLabel'><?= ucwords($state) ?></span></div><!-- storyInfo -->
+							<div class='storyInfo'><span class='storyData'><?= $totals['hours'][$state] ?> hours&nbsp;<br />(<?= $totals['counts'][$state] ?> stories)</span><span class='storyLabel <?= $state ?>'><?= ucwords($state) ?></span></div><!-- storyInfo -->
 							<?
 						}
+						/* End display the state totals for the project */
 					?>
-					<? /*
-					<div class='storyInfo'><span class='storyData'><?= $totals['hours']['accepted'] ?> hours&nbsp; (<?= $totals['counts']['accepted'] ?> stories)</span><span class='storyLabel'>Accepted</span></div><!-- storyInfo -->
-					<div class='storyInfo'><span class='storyData'><?= $totals['hours']['finished'] ?> hours&nbsp; (<?= $totals['counts']['finished'] ?> stories)</span><span class='storyLabel'>Finished</span></div><!-- storyInfo -->
-					<div class='storyInfo'><span class='storyData'><?= $totals['hours']['started'] ?> hours&nbsp; (<?= $totals['counts']['started'] ?> stories)</span><span class='storyLabel'>Started</span></div><!-- storyInfo -->
-					<div class='storyInfo'><span class='storyData'><?= $totals['hours']['unstarted'] ?> hours&nbsp; (<?= $totals['counts']['unstarted'] ?> stories)</span><span class='storyLabel'>Unstarted</span></div><!-- storyInfo -->
-					<div class='storyInfo'><span class='storyData'><?= $totals['hours']['unscheduled'] ?> hours&nbsp; (<?= $totals['counts']['unscheduled'] ?> stories)</span><span class='storyLabel'>Unscheduled</span></div><!-- storyInfo -->
-					<div class='storyInfo'><span class='storyData'>(<?= $totals['counts']['unestimated'] ?> stories)&nbsp;</span><span class='storyLabel'>Un-estimated</span></div><!-- storyInfo -->
-					 */ ?>
 				</div>
 				<?
+				/*
+				<!-- draw the chart -->
+				<script type="text/javascript">
+					google.setOnLoadCallback(drawWeeklyProgressBarChart_<?= $project->id ?>);
+
+					function drawWeeklyProgressBarChart_<?= $project->id ?>() {
+						var data = new google.visualization.DataTable();
+						<?= $pv->weeklyProgressChartData($weeklyProgress) ?>
+
+						var chart = new google.visualization.ColumnChart(
+							document.getElementById('projectWeeklyProgressBarChart_<?= $project->id ?>') 
+						);
+						chart.draw(data, {'legend':'none', 'vAxis': {'title':'Hours completed by week'}, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
+					}
+				</script>
+				<div class="progressChart" id="projectWeeklyProgressBarChart_<?= $project->id ?>" style="" ></div>
+				<br clear=both />
+				<!-- end of chart -->
+				*/
+				?>
+				<?
+				/* create stories hidden div */
 				if(count($stories))
 				{
 				?>
@@ -204,6 +255,7 @@
 					</div> <!-- stories -->
 				<?
 				}
+				/* End create stories hidden div */
 				?>
 			</div>  <!-- project -->
 
