@@ -163,6 +163,8 @@ function displayStory($story)
 		
 		if(count($todo))
 		{
+			$definedStates = $pv->states;
+			arsort($definedStates);
 			foreach($todo AS $name => $states)
 			{
 				$userDiv = str_replace(' ', '', $name);
@@ -172,7 +174,7 @@ function displayStory($story)
 				else 
 					echo "none";
 				echo ";' id='todo_".str_replace(' ', '', $name)."'>";
-				foreach($pv->states AS $state)
+				foreach($definedStates AS $state)
 				{
 					echo "<h3>".ucwords($state)."</h3>";
 					if(count($todo[$name][$state]))
