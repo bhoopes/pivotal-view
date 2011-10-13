@@ -241,11 +241,13 @@
 							var chart = new google.visualization.ColumnChart(
 								document.getElementById('projectWeeklyProgressBarChart_<?= $project->id ?>') 
 							);
-							chart.draw(data, {'legend':'none', 'chartArea':{'left':'0', 'width':'200'}, 'width':'200', 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
+							//chart.draw(data, {'legend':'none', 'chartArea':{'left':'0', 'width':'200'}, 'width':'200', 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
+							chart.draw(data, {'legend':'none', 'chartArea':{'left':'0', 'width':'150'}, 'width':'150', 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
+							//chart.draw(data, {'legend':'none', 'chartArea':{'left':'0'}, 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
 						}
 					</script>
 					<div class="progressChart" id="projectWeeklyProgressBarChart_<?= $project->id ?>" style="" ></div>
-					<br style="line-height: 1px;"/>
+					<br style="line-height: 1px;" clear="both" />
 					<div class="progressChartLabel" >hours completed by week</div>
 					<!-- end of chart -->
 				</div>
