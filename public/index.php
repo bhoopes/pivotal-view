@@ -10,10 +10,15 @@
 	date_default_timezone_set('America/Denver');
 	
 	require_once('../classes/PivotalView.php');
+	require_once('../classes/DeveloperGroups.php');
 	$pv = new PivotalView($token);
+	$groupClass = new DeveloperGroups($pv);
 	
-	//echo "Token: ".$pv->getToken()."<br /><br />";
-
+	$groups = $groupClass->getGroups();
+	$projectGroup = $groupClass->getProjectGroup();
+	$projectsByGroup = $groupClass->getProjectGroupByGroupName();
+	
+	//print_r($projectsByGroup);
 	
 	/*
 		SimpleXMLElement Object
@@ -120,6 +125,17 @@
 		}
 		return false;
 	}
+	
+	function changeDeveloperGroup(id, name)
+	{
+		//alert($('#developerGroupSelect_'+id).val() + " - " + name);
+		var displayGroup = $('#developerGroupSelect_'+id).val(); 
+		var url = "/developerGroupSelect.php?displayGroup=" + displayGroup + "&projectId=" + id + "&projectName=" + name;
+		//alert(url);
+		$.ajax(url);
+
+		return false;
+	}
 </script>
 
 <!-- Add Google Chart functionality-->
@@ -134,10 +150,18 @@
 <div class="projects">
 	<!-- <h3>Projects</h3> -->
 	<?
-		$projects = $pv->getProjects();
-		foreach($projects AS $project)
+		//$projects = $pv->getProjects();
+		//foreach($projects AS $id => $project)
+		foreach($projectsByGroup AS $groupName => $projects)
 		{
+			if($groupName == '')
+				echo "<h1>No Development Group Assigned</h1>";
+			else
+				echo "<h1>".$groupName."</h1>";
+			foreach($projects AS $projectId)
+			{
 			$totalHours = 0;
+			$project = $pv->getProjectById($projectId);
 			$stories = $pv->getStories($project->id);
 			$weeklyProgress = $pv->weeklyProgress($stories);
 			$totals = array('hours' => array(), 'counts' => array());
@@ -155,8 +179,31 @@
 			?>			
 			<div class='project'>
 				<div class='projectTitle'>
-					<?= $project->name ?>
+					<?= $project->name ?> - <?= $projectId ?>
 					<br /><span class='toggleStories'>(<a href='#' onclick='return toggleStories(<?= $project->id ?>)' >show/hide stories</a>)</span>
+					<br />
+					<?
+						if($_COOKIE['pv_username'] == "bhoopes" || $_COOKIE['pv_username'] == "stolman")
+						{
+							?>
+							<form name='developerGroup'>
+								<select id='developerGroupSelect_<?= $project->id ?>' onChange='return changeDeveloperGroup(<?= $project->id ?>, "<?= urlencode($project->name) ?>")' name='developerGroupSelect'>
+									<option value=''></option>
+									<?
+									foreach($groups AS $group)
+										{
+											echo "<option ";
+											if($projectGroup[$projectId]['groupName'] == $group)
+												echo "selected ";
+											echo "value='".$group."'>".$group."</option>";
+										}
+									?>
+								</select>
+							</form>
+							<?
+						}
+					
+					?>
 				</div>
 				<div class="projectInfoRight">
 					<div class="projectVelocity">
@@ -264,6 +311,7 @@
 			</div>  <!-- project -->
 
 		<?
+			}
 		}
 	?> <!-- projects -->
 </div> <!-- projects -->

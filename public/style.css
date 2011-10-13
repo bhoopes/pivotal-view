@@ -185,3 +185,36 @@
 .todoStoryDetails {
 	display: none;
 }
+
+.groupsBody {
+	width: 100%;
+	float: left;
+}
+
+.groupsBody .groups {
+	width: 50%;
+	float: left;
+}
+
+.groupsBody .projects {
+	width: 50%;
+	float: right;
+}
+
+.groupList {
+	list-style-type: none;
+	margin: 0px;
+	padding: 0px;
+}
+
+.groupProjects {
+	list-style-type: none;
+	margin-left: 10px;
+	padding: 0px;
+}
+
+.projectList {
+	list-style-type: none;
+	margin: 0px;
+	padding: 0px;
+}

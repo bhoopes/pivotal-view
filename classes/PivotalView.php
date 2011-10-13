@@ -81,7 +81,8 @@ class PivotalView
 		$projects = $this->parseXML($projects);
 		foreach($projects->project AS $item)
 		{
-			$items[] = $item;
+			$projectId = substr($item->id, 0);
+			$items[$projectId] = $item;
 		}
 		return $items;
 
@@ -99,8 +100,14 @@ class PivotalView
 	{
 		$project = $this->makeRequest("projects/$id");
 		$project = $this->parseXML($project);
+		return $project;
+		
+		echo "project: ";
+		print_r($project);
+		echo "<br />";
 		foreach($project->project AS $item)
 		{
+			print_r($item);
 			$items[] = $item;
 		}
 		return $items;

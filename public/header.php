@@ -4,6 +4,15 @@
 		&nbsp;&nbsp;|&nbsp;&nbsp;
 		<a href="todo.php" alt="Your very own todo list.">Todo</a>
 		&nbsp;&nbsp;|&nbsp;&nbsp;
+		<?
+			if($_COOKIE['pv_username'] == "bhoopes" || $_COOKIE['pv_username'] == "stolman")
+			{
+				?>
+					<a href="groups.php" alt="Modify names of Groups">Groups</a>
+					&nbsp;&nbsp;|&nbsp;&nbsp;
+				<?
+			}
+		?>
 		<a href="logout.php" alt="Logout of your current session">Logout</a>
 	</div>
 	<!-- <div id="headerTitle">Pivotal View</div> -->
