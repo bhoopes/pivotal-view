@@ -136,6 +136,11 @@
 
 		return false;
 	}
+	
+	function hideDiv(id)
+	{
+		$("#group_"+id).css("display", "none");
+	}
 </script>
 
 <!-- Add Google Chart functionality-->
@@ -152,16 +157,26 @@
 	<?
 		//$projects = $pv->getProjects();
 		//foreach($projects AS $id => $project)
+		$groupCount = 0;
 		foreach($projectsByGroup AS $groupName => $projects)
 		{
+			$projectCount = 0;
+			echo "<div id='group_".$groupCount++."'>";
 			if($groupName == '')
-				echo "<h1>No Development Group Assigned</h1>";
+				echo "<h1 class='projectGroupTitle'>No Development Group Assigned</h1>";
 			else
-				echo "<h1>".$groupName."</h1>";
+				echo "<h1 class='projectGroupTitle'>".$groupName."</h1>";
 			foreach($projects AS $projectId)
 			{
+				//check to see if the project exists, if not skip it
+				//this was introduced with the introduction of groups
+				$project = $pv->getProjectById($projectId);
+				if($project == "Resource not found")
+					continue;
+				$projectCount++;
+				
 			$totalHours = 0;
-			$project = $pv->getProjectById($projectId);
+			
 			$stories = $pv->getStories($project->id);
 			$weeklyProgress = $pv->weeklyProgress($stories);
 			$totals = array('hours' => array(), 'counts' => array());
@@ -179,7 +194,7 @@
 			?>			
 			<div class='project'>
 				<div class='projectTitle'>
-					<?= $project->name ?> - <?= $projectId ?>
+					<?= $project->name ?>
 					<br /><span class='toggleStories'>(<a href='#' onclick='return toggleStories(<?= $project->id ?>)' >show/hide stories</a>)</span>
 					<br />
 					<?
@@ -312,6 +327,14 @@
 
 		<?
 			}
+			if($projectCount == 0)
+			{
+				echo "<script type='text/javascript'>";
+					echo "hideDiv(".($groupCount-1).");";
+				echo "</script>";
+				echo "empty<br />";
+			}
+			echo "</div>";
 		}
 	?> <!-- projects -->
 </div> <!-- projects -->
