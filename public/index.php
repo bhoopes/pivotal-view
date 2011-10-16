@@ -141,6 +141,17 @@
 	{
 		$("#group_"+id).css("display", "none");
 	}
+	
+	function toggleHideableDetails() {
+		var currentStatus = $(".hidableDetails").css("display");
+		
+		if(currentStatus == "none")
+			$(".hidableDetails").css("display", "block");
+		else
+			$(".hidableDetails").css("display", "none");
+		
+		return false;
+	}
 </script>
 
 <!-- Add Google Chart functionality-->
@@ -153,6 +164,7 @@
 <body>
 <? include("header.php"); ?>
 <div class="projects">
+	<a href="#" onClick="return toggleHideableDetails();">Show Details</a><br />
 	<!-- <h3>Projects</h3> -->
 	<?
 		//$projects = $pv->getProjects();
@@ -163,7 +175,7 @@
 			$projectCount = 0;
 			echo "<div id='group_".$groupCount++."'>";
 			if($groupName == '')
-				echo "<h1 class='projectGroupTitle'>No Development Group Assigned</h1>";
+				echo "<h1 class='projectGroupTitle'>no development group assigned</h1>";
 			else
 				echo "<h1 class='projectGroupTitle'>".$groupName."</h1>";
 			foreach($projects AS $projectId)
@@ -194,84 +206,95 @@
 			?>			
 			<div class='project'>
 				<div class='projectTitle'>
-					<?= $project->name ?>
-					<br /><span class='toggleStories'>(<a href='#' onclick='return toggleStories(<?= $project->id ?>)' >show/hide stories</a>)</span>
-					<br />
-					<?
-						if($_COOKIE['pv_username'] == "bhoopes" || $_COOKIE['pv_username'] == "stolman")
-						{
-							?>
-							<form name='developerGroup'>
-								<select id='developerGroupSelect_<?= $project->id ?>' onChange='return changeDeveloperGroup(<?= $project->id ?>, "<?= urlencode($project->name) ?>")' name='developerGroupSelect'>
-									<option value=''></option>
-									<?
-									foreach($groups AS $group)
-										{
-											echo "<option ";
-											if($projectGroup[$projectId]['groupName'] == $group)
-												echo "selected ";
-											echo "value='".$group."'>".$group."</option>";
-										}
-									?>
-								</select>
-							</form>
-							<?
-						}
-					
-					?>
+					<div class="projectInfoLeft">
+						<div style="float: left;">
+							<?= $project->name ?>
+							<br /><span class='toggleStories hidableDetails'>(<a href='#' onclick='return toggleStories(<?= $project->id ?>)' >show/hide stories</a>)</span>
+						</div>
+						<div style="float: left;" class="hidableDetails">
+						<?
+							if($_COOKIE['pv_username'] == "bhoopes" || $_COOKIE['pv_username'] == "stolman")
+							{
+								?>
+								<form name='developerGroup'>
+									<select id='developerGroupSelect_<?= $project->id ?>' onChange='return changeDeveloperGroup(<?= $project->id ?>, "<?= urlencode($project->name) ?>")' name='developerGroupSelect'>
+										<option value=''></option>
+										<?
+										foreach($groups AS $group)
+											{
+												echo "<option ";
+												if($projectGroup[$projectId]['groupName'] == $group)
+													echo "selected ";
+												echo "value='".$group."'>".$group."</option>";
+											}
+										?>
+									</select>
+								</form>
+								<?
+							}
+
+						?>
+						</div>
+					</div> <!-- projectInfoLeft -->
+					<!-- show the weekly progress graph -->
+					<div class="projectTitleProgressChart hidableDetails">
+						<!-- draw the chart -->
+						<script type="text/javascript">
+							google.setOnLoadCallback(drawWeeklyProgressBarChart_<?= $project->id ?>);
+
+							function drawWeeklyProgressBarChart_<?= $project->id ?>() {
+								var data = new google.visualization.DataTable();
+								<?= $pv->weeklyProgressChartData($weeklyProgress) ?>
+
+								var chart = new google.visualization.ColumnChart(
+									document.getElementById('projectWeeklyProgressBarChart_<?= $project->id ?>') 
+								);
+								//chart.draw(data, {'legend':'none', 'chartArea':{'left':'0', 'width':'200'}, 'width':'200', 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
+								chart.draw(data, {'legend':'none', 'chartArea':{'left':'0', 'width':'150'}, 'width':'150', 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
+								//chart.draw(data, {'legend':'none', 'chartArea':{'left':'0'}, 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
+							}
+						</script>
+						<div class="progressChart" id="projectWeeklyProgressBarChart_<?= $project->id ?>" style="" ></div>
+						<br style="line-height: 1px;" clear="both" />
+						<div class="progressChartLabel" >hours completed by week</div>
+						<!-- end of chart -->
+					</div>
 				</div>
 				<div class="projectInfoRight">
 					<div class="projectVelocity">
-						<div class='storyInfo' ><span class='storyData' ><?= $project->current_velocity ?>&nbsp;</span><span class='storyLabel' style="width: 150px;" >current velocity</span></div><!-- storyInfo -->
+						<div class='storyInfo' ><span class='storyData' ><?= $project->current_velocity ?>&nbsp;</span><span class='storyLabel' >current velocity</span></div><!-- storyInfo -->
 					</div>
 					<br clear="both" />
 					<div class="projectEstimatedCompletion">
-						<div class='storyInfo' ><span class='storyData' ><?= date("m/d/Y", $estimatedCompletionDate); ?>&nbsp;</span><span class='storyLabel' style="width: 150px;">estimated completion week</span></div><!-- storyInfo -->
+						<div class='storyInfo' ><span class='storyData' ><?= date("m/d/Y", $estimatedCompletionDate); ?>&nbsp;</span><span class='storyLabel' >estimated completion</span></div><!-- storyInfo -->
+					</div>
+					<br clear="both" />
+					<div class="projectTotalHours">
+						<div class='storyInfo' ><span class='storyData' ><?= $totalHours ?>&nbsp;</span><span class='storyLabel' >total hours</span></div><!-- storyInfo -->
 					</div>
 				</div>
-				<div class="projectTitleProgressChart">
-					<!-- draw the chart -->
+				
+				<div class="projectHourChart">
+					<!-- show total hour bar chart -->
 					<script type="text/javascript">
-						google.setOnLoadCallback(drawWeeklyProgressBarChart_<?= $project->id ?>);
+						google.setOnLoadCallback(drawBarChart_<?= $project->id ?>);
 
-						function drawWeeklyProgressBarChart_<?= $project->id ?>() {
-							var data = new google.visualization.DataTable();
-							<?= $pv->weeklyProgressChartData($weeklyProgress) ?>
-
-							var chart = new google.visualization.ColumnChart(
-								document.getElementById('projectWeeklyProgressBarChart_<?= $project->id ?>') 
-							);
-							//chart.draw(data, {'legend':'none', 'chartArea':{'left':'0', 'width':'200'}, 'width':'200', 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
-							chart.draw(data, {'legend':'none', 'chartArea':{'left':'0', 'width':'150'}, 'width':'150', 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
-							//chart.draw(data, {'legend':'none', 'chartArea':{'left':'0'}, 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
+						function drawBarChart_<?= $project->id ?>() {
+							var wrapper = new google.visualization.ChartWrapper({
+								chartType: 'BarChart',
+								dataTable: <?= json_encode($simpleTotals) ?>,
+								//'title': '<?= $project->name ?> Hours',
+								options: { 'isStacked':'true', 'legend':'bottom', 'chartArea':{'left':'0', 'width':'675'}, colors:['#4b80c4','#61b847', '#f27926'], 'hAxis':{'maxValue':'1', 'viewWindow':{'max':'<?= $totalHours ?>'}}},
+								containerId: 'projectBarChart_<?= $project->id ?>'
+							});
+							wrapper.draw();
 						}
 					</script>
-					<div class="progressChart" id="projectWeeklyProgressBarChart_<?= $project->id ?>" style="" ></div>
-					<br style="line-height: 1px;" clear="both" />
-					<div class="progressChartLabel" >hours completed by week</div>
-					<!-- end of chart -->
-				</div>
-				<!-- show the weekly progress graph -->
-				<script type="text/javascript">
-					google.setOnLoadCallback(drawBarChart_<?= $project->id ?>);
-
-					function drawBarChart_<?= $project->id ?>() {
-						var wrapper = new google.visualization.ChartWrapper({
-							chartType: 'BarChart',
-							dataTable: <?= json_encode($simpleTotals) ?>,
-							//'title': '<?= $project->name ?> Hours',
-							options: { 'isStacked':'true', 'legend':'bottom', 'chartArea':{'left':'0', 'width':'675'}, colors:['#4b80c4','#61b847', '#f27926'], 'hAxis':{'maxValue':'1', 'viewWindow':{'max':'<?= $totalHours ?>'}}},
-							containerId: 'projectBarChart_<?= $project->id ?>'
-						});
-						wrapper.draw();
-					}
-				</script>
-				<div class="projectChart" id="projectBarChart_<?= $project->id ?>" style="" ></div>
+					<div class="projectChart" id="projectBarChart_<?= $project->id ?>" style="" ></div>
+				</div>  <!-- projectBarChart -->
 				<br clear=both />
-				<!-- end show the weekly progress graph -->
-				
 				<!-- projectStats -->
-				<div class='projectStats'>
+				<div class='projectStats hidableDetails'>
 					<? /*
 					 * This is a bar chart that is currently unused
 					 * But I didn't want to delete it because it might be useful for others

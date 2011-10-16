@@ -53,7 +53,14 @@ class DeveloperGroups
 	function getProjectGroupByGroupName()
 	{
 		$projectGroup = $this->getProjectGroup();
+		$groups = $this->getGroups();
 		$groupsIncluded = array();
+		
+		//setup groupProject with the correct order
+		foreach($groups AS $group)
+		{
+			$groupProject[$group] = array();
+		}
 		
 		foreach($projectGroup AS $id => $group)
 		{
