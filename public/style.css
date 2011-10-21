@@ -46,6 +46,11 @@
 	display: none;
 }
 
+.groupContainer {
+	float: left;
+	width: 100%;
+}
+
 .project {
 	margin-bottom: 15px;
 	margin-right: 10px;

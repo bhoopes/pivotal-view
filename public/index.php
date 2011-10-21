@@ -95,7 +95,7 @@
 			$output .= "<div class='storyInfo'><span class='storyData'>".$story->accepted_at."&nbsp;</span><span class='storyLabel'>Accepted</span></div><!-- storyInfo -->";
 			$output .= "<br clear=both />";
 			$output .= "<div class='storyDesc'>Description: ";
-			$output .= $story->description;
+			$output .= htmlentities($story->description);
 			$output .= "<br /><a href='".$story->url."' target='_blank'>View in PivotalTracker</a>";
 			$output .= "</div><!-- storyDesc -->";
 		$output .= "</div> <!-- story -->
@@ -140,6 +140,7 @@
 	function hideDiv(id)
 	{
 		$("#group_"+id).css("display", "none");
+		return false;
 	}
 	
 	function toggleHideableDetails() {
@@ -165,226 +166,216 @@
 <? include("header.php"); ?>
 <div class="projects">
 	<a href="#" onClick="return toggleHideableDetails();">Show Details</a><br />
-	<!-- <h3>Projects</h3> -->
 	<?
-		//$projects = $pv->getProjects();
-		//foreach($projects AS $id => $project)
 		$groupCount = 0;
 		foreach($projectsByGroup AS $groupName => $projects)
 		{
 			$projectCount = 0;
-			echo "<div id='group_".$groupCount++."'>";
-			if($groupName == '')
-				echo "<h1 class='projectGroupTitle'>no development group assigned</h1>";
-			else
-				echo "<h1 class='projectGroupTitle'>".$groupName."</h1>";
-			foreach($projects AS $projectId)
-			{
-				//check to see if the project exists, if not skip it
-				//this was introduced with the introduction of groups
-				$project = $pv->getProjectById($projectId);
-				if($project == "Resource not found")
-					continue;
-				$projectCount++;
-				
-			$totalHours = 0;
-			
-			$stories = $pv->getStories($project->id);
-			$weeklyProgress = $pv->weeklyProgress($stories);
-			$totals = array('hours' => array(), 'counts' => array());
-			if(count($stories))
-			{
-				foreach($stories AS $story)
-				{
-					$totals = projectTotals($totals, $story, $totalHours);
-				}
-			}
-			//print_r($totals);
-			$totals = zeroTotals($totals, $pv);
-			$simpleTotals = $pv->totalsChartData($totals);
-			$estimatedCompletionDate = $pv->getProjectedCompletionWeek($simpleTotals, $project->current_velocity);
-			?>			
-			<div class='project'>
-				<div class='projectTitle'>
-					<div class="projectInfoLeft">
-						<div style="float: left;">
-							<?= $project->name ?>
-							<br /><span class='toggleStories hidableDetails'>(<a href='#' onclick='return toggleStories(<?= $project->id ?>)' >show/hide stories</a>)</span>
-						</div>
-						<div style="float: left;" class="hidableDetails">
-						<?
-							if($_COOKIE['pv_username'] == "bhoopes" || $_COOKIE['pv_username'] == "stolman")
-							{
-								?>
-								<form name='developerGroup'>
-									<select id='developerGroupSelect_<?= $project->id ?>' onChange='return changeDeveloperGroup(<?= $project->id ?>, "<?= urlencode($project->name) ?>")' name='developerGroupSelect'>
-										<option value=''></option>
-										<?
-										foreach($groups AS $group)
-											{
-												echo "<option ";
-												if($projectGroup[$projectId]['groupName'] == $group)
-													echo "selected ";
-												echo "value='".$group."'>".$group."</option>";
-											}
-										?>
-									</select>
-								</form>
-								<?
-							}
-
-						?>
-						</div>
-					</div> <!-- projectInfoLeft -->
-					<!-- show the weekly progress graph -->
-					<div class="projectTitleProgressChart hidableDetails">
-						<!-- draw the chart -->
-						<script type="text/javascript">
-							google.setOnLoadCallback(drawWeeklyProgressBarChart_<?= $project->id ?>);
-
-							function drawWeeklyProgressBarChart_<?= $project->id ?>() {
-								var data = new google.visualization.DataTable();
-								<?= $pv->weeklyProgressChartData($weeklyProgress) ?>
-
-								var chart = new google.visualization.ColumnChart(
-									document.getElementById('projectWeeklyProgressBarChart_<?= $project->id ?>') 
-								);
-								//chart.draw(data, {'legend':'none', 'chartArea':{'left':'0', 'width':'200'}, 'width':'200', 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
-								chart.draw(data, {'legend':'none', 'chartArea':{'left':'0', 'width':'150'}, 'width':'150', 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
-								//chart.draw(data, {'legend':'none', 'chartArea':{'left':'0'}, 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
-							}
-						</script>
-						<div class="progressChart" id="projectWeeklyProgressBarChart_<?= $project->id ?>" style="" ></div>
-						<br style="line-height: 1px;" clear="both" />
-						<div class="progressChartLabel" >hours completed by week</div>
-						<!-- end of chart -->
-					</div>
-				</div>
-				<div class="projectInfoRight">
-					<div class="projectVelocity">
-						<div class='storyInfo' ><span class='storyData' ><?= $project->current_velocity ?>&nbsp;</span><span class='storyLabel' >current velocity</span></div><!-- storyInfo -->
-					</div>
-					<br clear="both" />
-					<div class="projectEstimatedCompletion">
-						<div class='storyInfo' ><span class='storyData' ><?= date("m/d/Y", $estimatedCompletionDate); ?>&nbsp;</span><span class='storyLabel' >estimated completion</span></div><!-- storyInfo -->
-					</div>
-					<br clear="both" />
-					<div class="projectTotalHours">
-						<div class='storyInfo' ><span class='storyData' ><?= $totalHours ?>&nbsp;</span><span class='storyLabel' >total hours</span></div><!-- storyInfo -->
-					</div>
-				</div>
-				
-				<div class="projectHourChart">
-					<!-- show total hour bar chart -->
-					<script type="text/javascript">
-						google.setOnLoadCallback(drawBarChart_<?= $project->id ?>);
-
-						function drawBarChart_<?= $project->id ?>() {
-							var wrapper = new google.visualization.ChartWrapper({
-								chartType: 'BarChart',
-								dataTable: <?= json_encode($simpleTotals) ?>,
-								//'title': '<?= $project->name ?> Hours',
-								options: { 'isStacked':'true', 'legend':'bottom', 'chartArea':{'left':'0', 'width':'675'}, colors:['#4b80c4','#61b847', '#f27926'], 'hAxis':{'maxValue':'1', 'viewWindow':{'max':'<?= $totalHours ?>'}}},
-								containerId: 'projectBarChart_<?= $project->id ?>'
-							});
-							wrapper.draw();
-						}
-					</script>
-					<div class="projectChart" id="projectBarChart_<?= $project->id ?>" style="" ></div>
-				</div>  <!-- projectBarChart -->
-				<br clear=both />
-				<!-- projectStats -->
-				<div class='projectStats hidableDetails'>
-					<? /*
-					 * This is a bar chart that is currently unused
-					 * But I didn't want to delete it because it might be useful for others
-					<script type="text/javascript">
-						google.setOnLoadCallback(drawChart_<?= $project->id ?>);
-
-						function drawChart_<?= $project->id ?>() {
-							var wrapper = new google.visualization.ChartWrapper({
-								chartType: 'ColumnChart',
-								dataTable: <?= $pv->totalsChartData($totals) ?>,
-								options: {'title': '<?= $project->name ?> Hours'},
-								containerId: 'projectChart_<?= $project->id ?>'
-							});
-							wrapper.draw();
-						}
-					</script>
-					 <div class="projectChart" id="projectChart_<?= $project->id ?>" style="" ></div>
-					 */
-					?>
-					
-					<?
-						/* Display the state totals for the project */
-						foreach($pv->states AS $state)
-						{
-							?>
-							<div class='storyInfo'><span class='storyData'><?= $totals['hours'][$state] ?> hours&nbsp;<br />(<?= $totals['counts'][$state] ?> stories)</span><span class='storyLabel <?= $state ?>'><?= $state ?></span></div><!-- storyInfo -->
-							<?
-						}
-						/* End display the state totals for the project */
-					?>
-				</div>
+			?>
+			<div class='groupContainer' id='group_<?= $groupCount++ ?>' >
 				<?
-				/*
-
-				*/
-				?>
-				<?
-				/* create stories hidden div */
-				if(count($stories))
+				if($groupName == '')
+					echo "<h1 class='projectGroupTitle'>no development group assigned</h1>";
+				else
+					echo "<h1 class='projectGroupTitle'>".$groupName."</h1>";
+				foreach($projects AS $projectId)
 				{
-				?>
-					<div class='stories' id='stories_<?= $project->id ?>'>
-					<?
-					foreach($stories AS $story)
+					//check to see if the project exists, if not skip it
+					//this was introduced with the introduction of groups
+					$project = $pv->getProjectById($projectId);
+					if($project == "Resource not found")
 					{
-						echo displayStory($story);
+						continue;
 					}
+					$projectCount++;
+				
+					$totalHours = 0;
+
+					$stories = $pv->getStories($project->id);
+					$weeklyProgress = $pv->weeklyProgress($stories);
+					$totals = array('hours' => array(), 'counts' => array());
+					if(count($stories))
+					{
+						foreach($stories AS $story)
+						{
+							$totals = projectTotals($totals, $story, $totalHours);
+						}
+					}
+					else
+						$totals = array();
+					//print_r($totals);
+					$totals = zeroTotals($totals, $pv);
+					$simpleTotals = $pv->totalsChartData($totals);
+					$estimatedCompletionDate = $pv->getProjectedCompletionWeek($simpleTotals, $project->current_velocity);
+				?>			
+					<div class='project'>
+						<div class='projectTitle'>
+							<div class="projectInfoLeft">
+								<div style="float: left;">
+									<?= $project->name ?>
+									<br /><span class='toggleStories hidableDetails'>(<a href='#' onclick='return toggleStories(<?= $project->id ?>)' >show/hide stories</a>)</span>
+								</div>
+								<div style="float: left;" class="hidableDetails">
+								<?
+									if($_COOKIE['pv_username'] == "bhoopes" || $_COOKIE['pv_username'] == "stolman")
+									{
+										?>
+										<form name='developerGroup'>
+											<select id='developerGroupSelect_<?= $project->id ?>' onChange='return changeDeveloperGroup(<?= $project->id ?>, "<?= urlencode($project->name) ?>")' name='developerGroupSelect'>
+												<option value=''></option>
+												<?
+												foreach($groups AS $group)
+													{
+														echo "<option ";
+														if($projectGroup[$projectId]['groupName'] == $group)
+															echo "selected ";
+														echo "value='".$group."'>".$group."</option>";
+													}
+												?>
+											</select>
+										</form>
+										<?
+									}
+
+								?>
+								</div> <!-- project Details -->
+							</div> <!-- projectInfoLeft -->
+
+							<!-- show the weekly progress graph -->
+							<div class="projectTitleProgressChart hidableDetails">
+								<!-- draw the chart -->
+								<script type="text/javascript">
+									google.setOnLoadCallback(drawWeeklyProgressBarChart_<?= $project->id ?>);
+									
+									function drawWeeklyProgressBarChart_<?= $project->id ?>() {
+										var data = new google.visualization.DataTable();
+										<?= $pv->weeklyProgressChartData($weeklyProgress) ?>
+
+										var chart = new google.visualization.ColumnChart(
+											document.getElementById('projectWeeklyProgressBarChart_<?= $project->id ?>') 
+										);
+										//chart.draw(data, {'legend':'none', 'chartArea':{'left':'0', 'width':'200'}, 'width':'200', 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
+										chart.draw(data, {'legend':'none', 'chartArea':{'left':'0', 'width':'150'}, 'width':'150', 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
+										//chart.draw(data, {'legend':'none', 'chartArea':{'left':'0'}, 'colors':['#4b80c4'], 'axisTitlesPosition':'none', 'vAxis': {'baselineColor':'#FFF', 'gridlineColor':'#FFF','textPosition':'none' }, 'hAxis':{'textPosition':'none', 'slantedText': true, 'showTextEvery':'2', 'slantedTextAngle':'90'}});
+									}
+								</script>
+								<div class="progressChart" id="projectWeeklyProgressBarChart_<?= $project->id ?>" style="" ></div>
+								<br style="line-height: 1px;" clear="both" />
+								<div class="progressChartLabel" >hours completed by week</div>
+								<!-- end of chart -->
+							</div> <!-- projectTitleProgressChart -->
+						</div> <!-- projectTitle -->
+						<div class="projectInfoRight">
+							<div class="projectVelocity">
+								<div class='storyInfo' >
+									<span class='storyData' ><?= $project->current_velocity ?>&nbsp;</span>
+									<span class='storyLabel' >current velocity</span>
+								</div><!-- storyInfo -->
+							</div> <!-- projectVelocity -->
+							<br clear="both" />
+							<div class="projectEstimatedCompletion">
+								<div class='storyInfo' >
+									<span class='storyData' ><?= date("m/d/Y", $estimatedCompletionDate); ?>&nbsp;</span>
+									<span class='storyLabel' >estimated completion</span>
+								</div><!-- storyInfo -->
+							</div> <!-- projectEstimatedCompletion -->
+							<br clear="both" />
+							<div class="projectTotalHours">
+								<div class='storyInfo' >
+									<span class='storyData' ><?= $totalHours ?>&nbsp;</span>
+									<span class='storyLabel' >total hours</span>
+								</div><!-- storyInfo -->
+							</div> <!-- projectTotalHours -->
+						</div> <!-- projectInfoRight -->
+
+						<div class="projectHourChart">
+							<!-- show total hour bar chart -->
+							<script type="text/javascript">
+								google.setOnLoadCallback(drawBarChart_<?= $project->id ?>);
+
+								function drawBarChart_<?= $project->id ?>() {
+									var wrapper = new google.visualization.ChartWrapper({
+										chartType: 'BarChart',
+										dataTable: <?= json_encode($simpleTotals) ?>,
+										//'title': '<?= $project->name ?> Hours',
+										options: { 'isStacked':'true', 'legend':'bottom', 'chartArea':{'left':'0', 'width':'675'}, colors:['#4b80c4','#61b847', '#f27926'], 'hAxis':{'maxValue':'1', 'viewWindow':{'max':'<?= $totalHours ?>'}}},
+										containerId: 'projectBarChart_<?= $project->id ?>'
+									});
+									wrapper.draw();
+								}
+							</script>
+							<div class="projectChart" id="projectBarChart_<?= $project->id ?>" style="" ></div>
+						</div>  <!-- projectHourChart -->
+						<br clear=both />
+						<!-- projectStats -->
+						<div class='projectStats hidableDetails'>
+							<?
+								/* Display the state totals for the project */
+								foreach($pv->states AS $state)
+								{
+									?>
+									<div class='storyInfo'><span class='storyData'><?= $totals['hours'][$state] ?> hours&nbsp;<br />(<?= $totals['counts'][$state] ?> stories)</span><span class='storyLabel <?= $state ?>'><?= $state ?></span></div><!-- storyInfo -->
+									<?
+								}
+								/* End display the state totals for the project */
+							?>
+						</div> <!-- projectStats -->
+
+					<?
+					/* create stories hidden div */
+					if(count($stories))
+					{
 					?>
-					</div> <!-- stories -->
-				<?
+						<div class='stories' id='stories_<?= $project->id ?>'>
+							<?
+							if(count($stories))
+							foreach($stories AS $story)
+							{
+								echo displayStory($story);
+							}
+							?>
+						</div> <!-- stories -->
+					<?
+					}
+					/* End create stories hidden div */
+					?>
+				</div>  <!-- project -->
+
+			<?
 				}
-				/* End create stories hidden div */
-				?>
-			</div>  <!-- project -->
-
+				if($projectCount == 0)
+				{
+					echo "<script type='text/javascript'> hideDiv(".($groupCount-1)."); </script>";
+					//echo "empty<br />";
+				}
+			?>
+			</div> <!-- groupContainer -->
 		<?
-			}
-			if($projectCount == 0)
-			{
-				echo "<script type='text/javascript'>";
-					echo "hideDiv(".($groupCount-1).");";
-				echo "</script>";
-				echo "empty<br />";
-			}
-			echo "</div>";
-		}
-	?> <!-- projects -->
-</div> <!-- projects -->
-
-<div class="activityStream">
-	<h3>Activity Stream</h3>
-	<?
-		$activites = $pv->getActivityStream();
-		if(count($activites))
-		{
-			foreach($activites AS $activity)
-			{
-				?>
-				<div class="activityStreamItem">
-					<span class="activityStreamTitle"><?= $activity->description ?></span><!-- activityStreamTitle -->
-					<br />
-					<span class="activityStreamDetails">
-						(<?= $activity->occurred_at ?>)
-						<a href='https://www.pivotaltracker.com/story/show/<?= $activity->stories->story->id ?>' alt='Really? Show me.' target='_blank' >View in Pivotal Tracker</a>
-					</span>
-				</div> <!-- activityStreamItem -->
-				<?
-			}
 		}
 	?>
-</div>
+</div> <!-- projects -->
+
+	<div class="activityStream">
+		<h3>Activity Stream</h3>
+		<?
+			$activites = $pv->getActivityStream();
+			if(count($activites))
+			{
+				foreach($activites AS $activity)
+				{
+					?>
+					<div class="activityStreamItem">
+						<span class="activityStreamTitle"><?= $activity->description ?></span><!-- activityStreamTitle -->
+						<br />
+						<span class="activityStreamDetails">
+							(<?= $activity->occurred_at ?>)
+							<a href='https://www.pivotaltracker.com/story/show/<?= $activity->stories->story->id ?>' alt='Really? Show me.' target='_blank' >View in Pivotal Tracker</a>
+						</span>
+					</div> <!-- activityStreamItem -->
+					<?
+				}
+			}
+		?>
+	</div> <!-- activityStream -->
 </body>
 </html>
