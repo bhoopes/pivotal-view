@@ -377,5 +377,6 @@
 			}
 		?>
 	</div> <!-- activityStream -->
+	<? include("footer.php"); ?>
 </body>
 </html>

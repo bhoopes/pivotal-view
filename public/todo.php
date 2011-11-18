@@ -190,4 +190,5 @@ function displayStory($story)
 		}
 		?>
 	</body>
+	<? include("footer.php"); ?>
 </html>

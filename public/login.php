@@ -48,4 +48,5 @@ if($_REQUEST['submit'] == 'Submit')
 				
 		</form>
 	</body>
+	<? include("footer.php"); ?>
 </html>

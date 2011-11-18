@@ -112,5 +112,6 @@ $groupData = $groupClass->getGroups();
 				</form>
 			</div>
 		</div><!-- end body -->
+		<? include("footer.php"); ?>
 	</body>
 </html>
