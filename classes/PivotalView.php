@@ -46,6 +46,21 @@ class PivotalView
 		return true;
 	}
 	
+	public function checkToken()
+	{
+		$tokenString = $this->makeRequest("projects");
+		//echo "-----".$tokenString."<br />";
+		//exit;
+		
+		if(trim($tokenString) == "Access denied.")
+		{
+			//echo "Access denied.\n\n";
+			return false;
+		}
+		
+		return true;
+	}
+	
 	private function makeRequest($path)
 	{
 		if($this->token == '')

@@ -12,6 +12,11 @@
 	require_once('../classes/PivotalView.php');
 	require_once('../classes/DeveloperGroups.php');
 	$pv = new PivotalView($token);
+	
+	//will return false if the token is invalid which would cause the page to crash
+	if($pv->checkToken() == false)
+			header("location: login.php");
+	
 	$groupClass = new DeveloperGroups($pv);
 	
 	$groups = $groupClass->getGroups();
