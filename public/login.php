@@ -6,8 +6,8 @@ $pv = new PivotalView();
 
 if($_REQUEST['submit'] == 'Submit')
 {
-	$username = filter_var($_REQUEST['username'], FILTER_SANITIZE_ENCODED);
-	$pwd = filter_var($_REQUEST['pwd'], FILTER_SANITIZE_ENCODED);
+	$username = filter_var($_REQUEST['username'], FILTER_SANITIZE_STRING);
+	$pwd = filter_var($_REQUEST['pwd'], FILTER_SANITIZE_STRING);
 	
 	//echo $username." - ".$pwd."<br />";
 	if($pv->fetchToken($username, $pwd) == true)
