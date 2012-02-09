@@ -122,7 +122,7 @@
 
 .bar {
         height: 30px;
-        float: right;
+        float: left;
 }
 
 .completed {
