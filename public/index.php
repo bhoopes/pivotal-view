@@ -109,6 +109,101 @@
 		return $output;
 	}
 ?>
+
+<style>
+.cssChart {
+        width: 680px;
+}
+
+.cssChartContainer {
+        width: 675px;
+
+}
+
+.bar {
+        height: 30px;
+        float: right;
+}
+
+.completed {
+        background: #4b80c4;
+}
+
+.in_progress {
+        background: #61b847;
+}
+
+.outstanding {
+        background: #f27926;
+}
+
+.maxLine {
+        border-right: 1pt solid black;
+        height: 50px;
+}
+
+.maxLabel {
+        float: right;
+        position: relative;
+        top: -17px;
+        right: 10px;
+}
+
+.cssChartLegend {
+        /* margin-top: 10px; */
+        margin-left: 150px;
+}
+.cssChartLegendItem {
+        margin-left: 10px;
+        float: left;
+}
+</style>
+
+<?
+	function createChart($data)
+	{
+		$completed = $data[1][0];
+		$inProgress = $data[1][1];
+		$outstanding = $data[1][2];
+		$total = $completed + $inProgress + $outstanding;		
+
+		if($total == 0)
+			return "No data.";
+
+		$comp_per = ($completed / $total)*100;
+		$in_per =($inProgress / $total)*100;
+		$out_per = ($outstanding / $total)*100;
+
+		$return = '';
+
+		$return = '<div class="cssChart">';
+			$return .= '<div class="cssChartContainer">';
+				$return .= '<div class="bar completed" style="width: '.$comp_per.'%;">&nbsp;</div>';
+				$return .= '<div class="bar in_progress" style="width: '.$in_per.'%;">&nbsp;</div>';
+				$return .= '<div class="bar outstanding" style="width: '.$out_per.'%;">&nbsp;</div>';
+				$return .= '<div class="maxLine" >&nbsp;</div>';
+				$return .= '<div class="maxLabel">'.$total.'</div>';
+			$return .= '</div>';
+			$return .= '<div class="cssChartLegend">';
+				$return .= '<div class="cssChartLegendItem">';
+					$return .= '<div style="display: block; width: 15px; background: #4b80c4; float: left;">&nbsp;</div>';
+					$return .= '<div style="float: left; margin-left: 5px;">completed ('.$completed.')</div>';
+				$return .= '</div>';
+				$return .= '<div class="cssChartLegendItem">';
+					$return .= '<div style="display: block; width: 15px; background: #61b847; float: left;">&nbsp;</div>';
+					$return .= '<div style="float: left; margin-left: 5px;">in progress ('.$inProgress.')</div>';
+				$return .= '</div>';
+				$return .= '<div class="cssChartLegendItem">';
+					$return .= '<div style="display: block; width: 15px; background: #f27926; float: left;">&nbsp;</div>';
+					$return .= '<div style="float: left; margin-left: 5px;">outstanding ('.$outstanding.')</div>';
+				$return .= '</div>';
+
+			$return .= '</div>';
+		$return .= '</div>';
+
+		return $return;
+	}
+?>
 <html>
 <head>
 <title>Pivotal View</title>
@@ -211,6 +306,7 @@
 					//print_r($totals);
 					$totals = zeroTotals($totals, $pv);
 					$simpleTotals = $pv->totalsChartData($totals);
+					//$chartTotals = $pv->totalsChartData($totals, "chart");
 					$estimatedCompletionDate = $pv->getProjectedCompletionWeek($simpleTotals, $project->current_velocity);
 				?>			
 					<div class='project'>
@@ -296,6 +392,7 @@
 						<div class="projectHourChart">
 							<!-- show total hour bar chart -->
 							<script type="text/javascript">
+							/*
 								google.setOnLoadCallback(drawBarChart_<?= $project->id ?>);
 
 								function drawBarChart_<?= $project->id ?>() {
@@ -308,8 +405,40 @@
 									});
 									wrapper.draw();
 								}
+							*/
+							</script>
+							<?= createChart($simpleTotals); ?>
+<?
+/*
+							<script type="text/javascript">
+								google.setOnLoadCallback(drawBarChart_<?= $project->id ?>);
+								function drawBarChart_<?= $project->id ?>() {
+									var data = new google.visualization.DataTable();
+									data.addColumn('string', 'Status');
+									data.addColumn('number', 'Hours');
+									//data.addRows(<?= json_encode($chartTotals) ?>);
+									data.addRows([["complete",302],["in progress",0],["outstanding",25]]);
+
+									var options = {
+										chartArea:	{'left':'0', 'width':'675'},
+										colors:		['#4b80c4', '#61b847', '#f27926'],
+										hAxis:		{'maxValue':'1', 'viewWindow':{'max':'<?= $totalHours ?>'}},
+										legend:		'bottom',
+										'isStacked': 	true
+									};
+									/*
+									var options = {
+									  width: 400, height: 240,
+									  title: 'Company Performance',
+									  hAxis: {title: 'Year', titleTextStyle: {color: 'red'}}
+									};
+
+									var chart = new google.visualization.ColumnChart(document.getElementById('projectBarChart_<?= $project->id ?>'));
+									chart.draw(data, options);
+								}
 							</script>
 							<div class="projectChart" id="projectBarChart_<?= $project->id ?>" style="" ></div>
+*/ ?>
 						</div>  <!-- projectHourChart -->
 						<br clear=both />
 						<!-- projectStats -->
